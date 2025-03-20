@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-import 'dart:convert'; // Import dart:convert for jsonDecode
+import 'dart:convert';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -12,22 +12,18 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   List<dynamic> users = [];
 
-  /// Fetch Users Function
+  /// Fetch Users from API
   Future<void> fetchUsers() async {
-    const url = 'https://randomuser.me/api/?results=50';
+    const url = 'https://randomuser.me/api/?results=20';
     final uri = Uri.parse(url);
 
     try {
       final response = await http.get(uri);
-
       if (response.statusCode == 200) {
-        final body = response.body;
-        final json = jsonDecode(body);
-
+        final json = jsonDecode(response.body);
         setState(() {
           users = json['results'];
         });
-        print(users);
         print("[INFO] Users fetched successfully.");
       } else {
         print(
@@ -40,12 +36,18 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   @override
+  void initState() {
+    super.initState();
+    fetchUsers();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text("User List")),
       body:
           users.isEmpty
-              ? const Center(child: Text("No Users Found"))
+              ? const Center(child: CircularProgressIndicator())
               : ListView.builder(
                 itemCount: users.length,
                 itemBuilder: (context, index) {
